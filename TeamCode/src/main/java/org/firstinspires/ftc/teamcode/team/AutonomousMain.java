@@ -54,8 +54,6 @@ public class AutonomousMain extends LinearOpMode {
 
     private DcMotor intake;
 
-    //Declare imu
-
     @Override
     public void runOpMode() throws InterruptedException
     {
