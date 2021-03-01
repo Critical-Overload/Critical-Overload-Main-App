@@ -46,7 +46,7 @@ public class AutonomousMain extends LinearOpMode {
     private DcMotor outtakeLeft;
     private DcMotor outtakeRight;
 
-    //Figures for Odometry
+    //Figure for Odometry
     final double COUNTS_PER_INCH = 307.699557;
 
     //Odometry encoder wheels
