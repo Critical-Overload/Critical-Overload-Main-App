@@ -27,7 +27,7 @@ import java.util.List;
  */
 @Config
 public class StandardTrackingWheelLocalizer extends ThreeTrackingWheelLocalizer {
-    public static double TICKS_PER_REV = 360;
+    public static double TICKS_PER_REV = 1280;
     public static double WHEEL_RADIUS = (1.49606/2); // in
     public static double GEAR_RATIO = 1; // output (wheel) speed / input (encoder) speed
 
