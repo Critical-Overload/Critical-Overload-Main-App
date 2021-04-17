@@ -55,6 +55,10 @@ public class AutonomousMain extends LinearOpMode {
                 .splineToConstantHeading(new Vector2d(-1,37), Math.toRadians(0))
                 .build();
 
+        Trajectory testTrajectory = drive.trajectoryBuilder(startPose)
+                .splineToConstantHeading(new Vector2d(-50,49),Math.toRadians(0))
+                .build();
+
         Trajectory shootingTrajectory = drive.trajectoryBuilder(startTrajectory.end())
                 .addDisplacementMarker(0,() -> {
                     robot.intakePower(1);
@@ -168,7 +172,7 @@ public class AutonomousMain extends LinearOpMode {
 
         waitForStart();
 
-        drive.followTrajectory(startTrajectory);
+        drive.followTrajectory(testTrajectory);
         robot.shoot();
 
         //targetZone: 1 = A, 2 = B, 3 = C
