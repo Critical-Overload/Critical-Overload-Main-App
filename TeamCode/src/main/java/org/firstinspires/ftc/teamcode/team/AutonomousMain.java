@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.team;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -25,75 +28,118 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+
+
 @Autonomous(name = "AutonomousMain")
 public class AutonomousMain extends LinearOpMode {
     double hue;
     OpenCvCamera webcam;
-    WebcamName webcam1;
     MainPipeline mainPipeline;
     double sensitivity;
-
-    private DcMotor motorFrontRight;
-    private DcMotor motorFrontLeft;
-    private DcMotor motorBackRight;
-    private DcMotor motorBackLeft;
-
-    private DcMotor wobbleArm;
-    private Servo wobbleClaw;
-
-    private Servo flipper;
-
-    private DcMotor outtakeLeft;
-    private DcMotor outtakeRight;
-
-    //Figure for Odometry
-    final double COUNTS_PER_INCH = 307.699557;
-
-    //Odometry encoder wheels
-    DcMotor verticalRight, verticalLeft, horizontal;
-
-    private DcMotor intake;
 
     @Override
     public void runOpMode() throws InterruptedException
     {
-        motorFrontRight = hardwareMap.dcMotor.get("FR");
-        motorFrontLeft = hardwareMap.dcMotor.get("FL");
-        motorBackRight = hardwareMap.dcMotor.get("BR");
-        motorBackLeft = hardwareMap.dcMotor.get("BL");
-        motorFrontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorFrontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorBackRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        motorBackLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        wobbleArm = hardwareMap.dcMotor.get("wobbleArm");
-        wobbleClaw = hardwareMap.servo.get("wobbleClaw");
-
-        flipper = hardwareMap.servo.get("flipper");
-        intake = hardwareMap.dcMotor.get("intake");
+        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+        robotControl robot = new robotControl(hardwareMap);
 
 
-        //launcher
-        /*outtakeRight = hardwareMap.dcMotor.get("outtakeRight");
-        outtakeLeft = hardwareMap.dcMotor.get("outtakeLeft");*/
-        outtakeLeft=hardwareMap.get(DcMotor.class, "outtakeLeft");
-        outtakeRight=hardwareMap.get(DcMotor.class, "outtakeRight");
-        outtakeLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        outtakeLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-        outtakeRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        Pose2d startPose = new Pose2d(-62.5, 49, Math.toRadians(0));
 
-        //Set zero power behaviors to brake
-        motorFrontRight.setDirection(DcMotor.Direction.REVERSE);
-        motorBackRight.setDirection(DcMotor.Direction.REVERSE);
+        drive.setPoseEstimate(startPose);
 
-        motorFrontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motorBackRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motorFrontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motorBackLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Trajectory startTrajectory = drive.trajectoryBuilder(startPose)
+                .splineToConstantHeading(new Vector2d(-20,49),Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(-1,37), Math.toRadians(0))
+                .build();
 
-        wobbleClaw.setPosition(0);
-        flipper.setPosition(1);
+        Trajectory testTrajectory = drive.trajectoryBuilder(startPose)
+                .splineToConstantHeading(new Vector2d(-50,49),Math.toRadians(0))
+                .build();
+
+        Trajectory shootingTrajectory = drive.trajectoryBuilder(startTrajectory.end())
+                .addDisplacementMarker(0,() -> {
+                    robot.intakePower(1);
+                    robot.outtakeHigh();
+                 })
+                .splineToConstantHeading(new Vector2d(-20,37), Math.toRadians(0))
+                .splineToConstantHeading(new Vector2d(-1,37), Math.toRadians(0))
+                .build();
+
+        Trajectory Atrajectory = drive.trajectoryBuilder(shootingTrajectory.end())
+                .splineToConstantHeading(new Vector2d(-5,62),Math.toRadians(0))
+                .addDisplacementMarker(14,() -> {
+                    robot.extendWobbleArm();
+                })
+                .addDisplacementMarker(() -> {
+                    robot.openClaw();
+                    robot.retractWobbleArm();
+                })
+                .splineToSplineHeading(new Pose2d(-35,35, Math.toRadians(225)), Math.toRadians(0))
+                .addDisplacementMarker(80, () -> {
+                    robot.extendWobbleArm();
+                })
+                .addDisplacementMarker(() -> {
+                    robot.closeClaw();
+                })
+                .splineToSplineHeading(new Pose2d(-5,62, Math.toRadians(0)), Math.toRadians(225))
+                .addDisplacementMarker(() -> {
+                   robot.openClaw();
+                   robot.retractWobbleArm();
+                })
+                .splineToConstantHeading(new Vector2d(11,62), Math.toRadians(0))
+                .build();
+
+        Trajectory Btrajectory = drive.trajectoryBuilder(shootingTrajectory.end())
+                .splineToConstantHeading(new Vector2d(30,37), Math.toRadians(0))
+                .addDisplacementMarker(15, () -> {
+                    robot.extendWobbleArm();
+                })
+                .addDisplacementMarker(() -> {
+                    robot.openClaw();
+                    robot.retractWobbleArm();
+                })
+                .splineToSplineHeading(new Pose2d(-35,35,Math.toRadians(225)), Math.toRadians(0))
+                .addDisplacementMarker(75, () -> {
+                    robot.extendWobbleArm();
+                })
+                .addDisplacementMarker(() -> {
+                    robot.closeClaw();
+                })
+                .splineToSplineHeading(new Pose2d(30,37,Math.toRadians(0)), Math.toRadians(225))
+                .addDisplacementMarker(() -> {
+                    robot.openClaw();
+                    robot.retractWobbleArm();
+                })
+                .splineToConstantHeading(new Vector2d(11,37), Math.toRadians(0))
+                .build();
+
+        Trajectory Ctrajectory = drive.trajectoryBuilder(shootingTrajectory.end())
+                .splineToSplineHeading(new Pose2d(50,50, Math.toRadians(45)), Math.toRadians(0))
+                .addDisplacementMarker(28, () -> {
+                    robot.extendWobbleArm();
+                })
+                .addDisplacementMarker(() -> {
+                    robot.openClaw();
+                    robot.retractWobbleArm();
+                })
+                .splineToSplineHeading(new Pose2d(-35,35, Math.toRadians(225)), Math.toRadians(45))
+                .addDisplacementMarker(125, () -> {
+                    robot.extendWobbleArm();
+                })
+                .addDisplacementMarker(() -> {
+                    robot.closeClaw();
+
+                })
+                .splineToSplineHeading(new Pose2d(50,50,Math.toRadians(45)), Math.toRadians(225))
+                .addDisplacementMarker(() -> {
+                    robot.openClaw();
+                    robot.retractWobbleArm();
+                })
+                .splineToConstantHeading(new Vector2d(11,50), Math.toRadians(225))
+                .build();
 
         /*
          * Instantiate an OpenCvCamera object for the camera we'll be using.
@@ -118,18 +164,20 @@ public class AutonomousMain extends LinearOpMode {
 
         webcam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
 
-        telemetry.addLine("Ready");
+        telemetry.addLine("The Robot is Ready");
+        telemetry.update();
 
         //Input Upright Mid Point: 240,320
         //Input Sideways Mid Point: 320,240
 
         waitForStart();
 
+        drive.followTrajectory(startTrajectory);
+        robot.shoot();
 
         //targetZone: 1 = A, 2 = B, 3 = C
         int targetZone = 0;
         int stackThreshold = 60;
-
 
         int stack = mainPipeline.ycontours.size();
         telemetry.addData("Stack Height before case: ", mainPipeline.stackHeight);
@@ -145,23 +193,27 @@ public class AutonomousMain extends LinearOpMode {
 
         }
 
+        drive.followTrajectory(shootingTrajectory);
+        robot.shoot();
+        robot.intakeOff();
+        robot.outtakeOff();
+
         telemetry.addData("Stack Height: ", mainPipeline.stackHeight);
         telemetry.addData("tz: ", targetZone);
         telemetry.update();
 
-
-
         switch(targetZone){
             case 1:
-
+                drive.followTrajectory(Atrajectory);
                 break;
             case 2:
-
+                drive.followTrajectory(Btrajectory);
                 break;
             case 3:
-
+                drive.followTrajectory(Ctrajectory);
                 break;
             default:
+                telemetry.addLine("Did Not Read Stack");
                 break;
         }
 

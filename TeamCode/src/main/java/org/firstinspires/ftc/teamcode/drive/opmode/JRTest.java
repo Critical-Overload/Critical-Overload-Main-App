@@ -1,16 +1,13 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.drive.opmode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-//import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
+
+//import com.qualcomm.robotcore.hardware.DcMotorSimple;
 //import org.openftc.revextensions2.ExpansionHubEx;
 
 /**
@@ -29,7 +26,7 @@ public class JRTest extends LinearOpMode{
 
     private BNO055IMU imu;
 
-    private IMURobot robot;
+//    private IMURobot robot;
 
     //Figures for ring elevator calculations
     private static final double PINION_CIRCUMFERENCE = 2.57;
@@ -99,11 +96,11 @@ public class JRTest extends LinearOpMode{
         motorBackLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
-        robot = new IMURobot(motorFrontRight, motorFrontLeft, motorBackRight, motorBackLeft,
-                imu, wobbleArm, wobbleClaw, flipper, intake,
-                outtakeRight, outtakeLeft, leftwing, rightwing, this);
+  //      robot = new IMURobot(motorFrontRight, motorFrontLeft, motorBackRight, motorBackLeft,
+  //              imu, wobbleArm, wobbleClaw, flipper, intake,
+  //              outtakeRight, outtakeLeft, leftwing, rightwing, this);
 
-        robot.setupRobot();//calibrate IMU, set any required parameters
+  //      robot.setupRobot();//calibrate IMU, set any required parameters
 
         double powerMod = 1.0;
         double intakeMod = 1.0;
@@ -112,9 +109,9 @@ public class JRTest extends LinearOpMode{
 
         waitForStart();
 
-        globalPositionUpdate = new OdometryGlobalCoordinatePosition(verticalLeft, verticalRight, horizontal, COUNTS_PER_INCH, 75);
-        Thread positionThread = new Thread(globalPositionUpdate);
-        positionThread.start();
+    //    globalPositionUpdate = new OdometryGlobalCoordinatePosition(verticalLeft, verticalRight, horizontal, COUNTS_PER_INCH, 75);
+    //    Thread positionThread = new Thread(globalPositionUpdate);
+    //    positionThread.start();
 
         while(opModeIsActive()){
             /*
@@ -137,19 +134,19 @@ public class JRTest extends LinearOpMode{
             }else{
                 intakeMod = -1.0;
             }
-
-            if(gamepad1.left_trigger>0){
-                leftwing.setPosition(1);
-                rightwing.setPosition(1);
-            }
-            else{
-                leftwing.setPosition(0);
-                rightwing.setPosition(0);
-            }
-            //intakeMod=-1.0;
             double intakeSpeed = gamepad1.left_trigger * intakeMod;//intake
             // * .85;
             intake.setPower(intakeSpeed);
+
+            if(gamepad1.x){
+                leftwing.setPosition(1);
+                rightwing.setPosition(1);
+            }
+            else if(gamepad1.y
+            ){
+                leftwing.setPosition(0.2);
+                rightwing.setPosition(0);
+            }
 
             //    double ejectSpeed = gamepad1.right_trigger * 1.0;//eject
             //     intake.setPower(ejectSpeed);
@@ -160,7 +157,7 @@ public class JRTest extends LinearOpMode{
 
             if(gamepad2.a){
                 flipper.setPosition(0);
-                Thread.sleep(500);
+                Thread.sleep(250);
                 flipper.setPosition(1);
             }
 
@@ -187,10 +184,10 @@ public class JRTest extends LinearOpMode{
 
 
             if(gamepad2.right_bumper){
-                outtakeMod= .60;
+                outtakeMod= .6;
                 //outtakeMod = 0.32; //power shots
             }else{
-                outtakeMod=.64;
+                outtakeMod=.65;
                 // outtakeMod = 0.3225;
             }
             double outtakePower = outtakeMod;
@@ -201,7 +198,7 @@ public class JRTest extends LinearOpMode{
                 outtakeRight.setPower(0);
                 if(gamepad2.a){
                     flipper.setPosition(0);
-                    Thread.sleep(500);
+                    Thread.sleep(250);
                     flipper.setPosition(1);
                 }
             }
@@ -241,15 +238,15 @@ public class JRTest extends LinearOpMode{
             telemetry.addData("Outtake RPM", outtakeRPM);
             telemetry.addData("Outtake Wheel Velocity (m/s)", outtakeWheelVelocity);
 
-            telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
-            telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate() / COUNTS_PER_INCH);
-            telemetry.addData("Orientation (Degrees)", globalPositionUpdate.returnOrientation());
+      //      telemetry.addData("X Position", globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
+      //      telemetry.addData("Y Position", globalPositionUpdate.returnYCoordinate() / COUNTS_PER_INCH);
+      //      telemetry.addData("Orientation (Degrees)", globalPositionUpdate.returnOrientation());
 
             telemetry.addData("Vertical left encoder position", verticalLeft.getCurrentPosition());
             telemetry.addData("Vertical right encoder position", verticalRight.getCurrentPosition());
             telemetry.addData("horizontal encoder position", horizontal.getCurrentPosition());
 
-            telemetry.addData("Thread Active", positionThread.isAlive());
+      //      telemetry.addData("Thread Active", positionThread.isAlive());
             //telemetry.addData("5v monitor", expansionHub.read5vMonitor(ExpansionHubEx.VoltageUnits.VOLTS)); //Voltage from the phone
             // telemetry.addData("12v monitor", expansionHub.read12vMonitor(ExpansionHubEx.VoltageUnits.VOLTS)); //Battery voltage
             telemetry.update();
@@ -257,7 +254,7 @@ public class JRTest extends LinearOpMode{
             telemetry.update();
             idle();
         }
-        globalPositionUpdate.stop();
+     //   globalPositionUpdate.stop();
 
     }
 
