@@ -44,17 +44,13 @@ public class AutonomousMain extends LinearOpMode {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         robotControl robot = new robotControl(hardwareMap);
 
-        Pose2d startPose = new Pose2d(-62.5, 49, Math.toRadians(0));
+        Pose2d startPose = new Pose2d(-62, 49, Math.toRadians(0));
 
         drive.setPoseEstimate(startPose);
 
         Trajectory startTrajectory = drive.trajectoryBuilder(startPose)
                 .splineToConstantHeading(new Vector2d(-20,49),Math.toRadians(0))
                 .splineToConstantHeading(new Vector2d(-1,37), Math.toRadians(0))
-                .build();
-
-        Trajectory testTrajectory = drive.trajectoryBuilder(startPose)
-                .splineToConstantHeading(new Vector2d(-50,49),Math.toRadians(0))
                 .build();
 
         Trajectory shootingTrajectory = drive.trajectoryBuilder(startTrajectory.end())
@@ -170,7 +166,7 @@ public class AutonomousMain extends LinearOpMode {
 
         waitForStart();
 
-        drive.followTrajectory(testTrajectory);
+        drive.followTrajectory(startTrajectory);
         robot.shoot();
 
         //targetZone: 1 = A, 2 = B, 3 = C
