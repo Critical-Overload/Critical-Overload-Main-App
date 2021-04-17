@@ -44,8 +44,6 @@ public class AutonomousMain extends LinearOpMode {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         robotControl robot = new robotControl(hardwareMap);
 
-
-
         Pose2d startPose = new Pose2d(-62.5, 49, Math.toRadians(0));
 
         drive.setPoseEstimate(startPose);
