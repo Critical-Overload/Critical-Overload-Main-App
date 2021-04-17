@@ -44,6 +44,8 @@ public class AutonomousMain extends LinearOpMode {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
         robotControl robot = new robotControl(hardwareMap);
 
+
+
         Pose2d startPose = new Pose2d(-62.5, 49, Math.toRadians(0));
 
         drive.setPoseEstimate(startPose);
@@ -51,6 +53,10 @@ public class AutonomousMain extends LinearOpMode {
         Trajectory startTrajectory = drive.trajectoryBuilder(startPose)
                 .splineToConstantHeading(new Vector2d(-20,49),Math.toRadians(0))
                 .splineToConstantHeading(new Vector2d(-1,37), Math.toRadians(0))
+                .build();
+
+        Trajectory testTrajectory = drive.trajectoryBuilder(startPose)
+                .splineToConstantHeading(new Vector2d(-50,49),Math.toRadians(0))
                 .build();
 
         Trajectory shootingTrajectory = drive.trajectoryBuilder(startTrajectory.end())
@@ -63,7 +69,7 @@ public class AutonomousMain extends LinearOpMode {
                 .build();
 
         Trajectory Atrajectory = drive.trajectoryBuilder(shootingTrajectory.end())
-                .splineToConstantHeading(new Vector2d(-5,47),Math.toRadians(0)) //65
+                .splineToConstantHeading(new Vector2d(-5,62),Math.toRadians(0))
                 .addDisplacementMarker(14,() -> {
                     robot.extendWobbleArm();
                 })
@@ -78,7 +84,7 @@ public class AutonomousMain extends LinearOpMode {
                 .addDisplacementMarker(() -> {
                     robot.closeClaw();
                 })
-                .splineToSplineHeading(new Pose2d(-5,47, Math.toRadians(0)), Math.toRadians(0))
+                .splineToSplineHeading(new Pose2d(-5,62, Math.toRadians(0)), Math.toRadians(225))
                 .addDisplacementMarker(() -> {
                    robot.openClaw();
                    robot.retractWobbleArm();
@@ -119,7 +125,7 @@ public class AutonomousMain extends LinearOpMode {
                     robot.openClaw();
                     robot.retractWobbleArm();
                 })
-                .splineToSplineHeading(new Pose2d(-35,35, Math.toRadians(45)), Math.toRadians(225))
+                .splineToSplineHeading(new Pose2d(-35,35, Math.toRadians(225)), Math.toRadians(45))
                 .addDisplacementMarker(125, () -> {
                     robot.extendWobbleArm();
                 })
@@ -127,12 +133,12 @@ public class AutonomousMain extends LinearOpMode {
                     robot.closeClaw();
 
                 })
-                .splineToSplineHeading(new Pose2d(50,50,Math.toRadians(225)), Math.toRadians(45))
+                .splineToSplineHeading(new Pose2d(50,50,Math.toRadians(45)), Math.toRadians(225))
                 .addDisplacementMarker(() -> {
                     robot.openClaw();
                     robot.retractWobbleArm();
                 })
-                .splineToConstantHeading(new Vector2d(11,50), Math.toRadians(45))
+                .splineToConstantHeading(new Vector2d(11,50), Math.toRadians(225))
                 .build();
 
         /*
